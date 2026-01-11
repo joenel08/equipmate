@@ -97,8 +97,41 @@
       <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
     </div>
   </div>
-</div>
 
+
+
+ <div class="col-lg-3 col-md-3 col-6">
+    <div class="small-box bg-info">
+      <div class="inner">
+        <h3> <?php
+        echo $conn->query("SELECT * from employees")->num_rows
+          ?></h3>
+        <p>Total Employees</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <a href="./index.php?page=employee_list" class="small-box-footer">More info <i
+          class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-3 col-6">
+    <div class="small-box bg-purple">
+      <div class="inner">
+        <h3> <?php
+        echo $conn->query("SELECT * from department_list")->num_rows
+          ?></h3>
+        <p>Total Department</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-building"></i>
+      </div>
+      <a href="./index.php?page=department_list" class="small-box-footer">More info <i
+          class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+</div>
 
 <?php
 $materialLabels = [];

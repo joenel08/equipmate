@@ -85,6 +85,14 @@
             </p>
           </a>
         </li>
+        <li class="nav-item dropdown">
+          <a href="./index.php?page=suppliers_list" class="nav-link nav-suppliers_list">
+            <i class="nav-icon far fa-address-card"></i>
+            <p>
+              Suppliers List
+            </p>
+          </a>
+        </li>
 
 
         <li class="nav-item dropdown">
@@ -93,6 +101,15 @@
             <!-- <img src="assets/img/senior_icon.png" class="nav-icon" alt=""> -->
             <p>
               Materials List
+            </p>
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a href="./index.php?page=department_list" class="nav-link nav-department_list">
+            <i class="nav-icon 	fa fa-building"></i>
+            <!-- <img src="assets/img/senior_icon.png" class="nav-icon" alt=""> -->
+            <p>
+              Department List
             </p>
           </a>
         </li>
@@ -201,12 +218,12 @@
 </aside>
 
 <script>
-  $('#manage_account').click(function () {
+  $('#manage_account').click(function() {
     uni_modal('Manage Account', 'manage_user.php?id=<?php echo $_SESSION['login_id'] ?>')
   })
 </script>
 <script>
-  $(document).ready(function () {
+  $(document).ready(function() {
     var page = '<?php echo isset($_GET['page']) ? $_GET['page'] : 'home' ?>';
     var s = '<?php echo isset($_GET['s']) ? $_GET['s'] : '' ?>';
     if (s != '')

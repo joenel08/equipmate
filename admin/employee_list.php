@@ -2,7 +2,7 @@
 
 <div class="row">
     <!-- Form Section -->
-    <div class="col-md-5">
+    <div class="col-sm-4">
         <div class="card">
             <div class="card-header">
                 <strong>Add New Employee</strong>
@@ -11,6 +11,24 @@
                 <form action="" id="manage-employee">
                     <input type="hidden" name="employee_id"
                         value="<?php echo isset($employee_id) ? $employee_id : '' ?>">
+                    <!-- Department Selection -->
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select class="form-control" name="department_id" id="department_id" required>
+                            <option value="">Select Department</option>
+                            <?php
+                            $dept_qry = $conn->query("SELECT * FROM department_list ORDER BY department_name");
+                            while ($dept = $dept_qry->fetch_assoc()):
+                                $selected = (isset($department_id) && $department_id == $dept['d_id']) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo $dept['d_id'] ?>" <?php echo $selected ?>>
+                                    <?php echo $dept['department_abbrv'] . ' - ' . $dept['department_name'] ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+
+
                     <div class="form-group">
                         <label for="" class="text-normal font-weight-normal">Employee ID No.</label>
                         <input type="text" name="eIDno" class="form-control form-control-sm"
@@ -56,7 +74,7 @@
                     <div class="d-flex justify-content-end w-100">
                         <button class="btn btn-sm btn-success btn-flat mx-1"><i class="fa fa-save"></i> Save
                             Employee</button>
-                        <a href="./index.php?page=categories_list"
+                        <a href="./index.php?page=employee_list"
                             class="btn btn-sm btn-secondary btn-flat mx-1">Cancel</a>
                     </div>
                 </form>
@@ -72,17 +90,18 @@
             <div class="card-body">
 
                 <table class="table table-hover table-bordered" id="list">
-                    <colgroup>
+                    <!-- <colgroup>
                         <col width="5%">
                         <col width="10%">
                         <col width="40%">
                         <col width="15%">
                         <col width="15%">
                         <col width="15%">
-                    </colgroup>
+                    </colgroup> -->
                     <thead>
                         <tr>
                             <th class="text-center">#</th>
+                            <th>Department</th>
                             <th>Employee ID No</th>
                             <th>Employee Name</th>
                             <th>Type</th>
@@ -93,14 +112,17 @@
                     <tbody>
                         <?php
                         $i = 1;
-                        $qry = $conn->query("SELECT `employee_id`, `eIDno`, `empType`, `preName`, `lName`, `fName`, `mName`, `sName`, `created_at` FROM `employees` ORDER BY created_at DESC");
+                        $qry = $conn->query("SELECT * FROM employees e
+                        left join department_list d on e.department_id = d.d_id
+                         ORDER BY created_at DESC");
 
                         if ($qry->num_rows > 0) {
                             while ($row = $qry->fetch_assoc()):
                                 $fullname = $row['preName'] . ' ' . $row['fName'] . ' ' . $row['mName'] . ' ' . $row['lName'] . ', ' . $row['sName'];
-                                ?>
+                        ?>
                                 <tr>
                                     <th class="text-center"><?php echo $i++ ?></th>
+                                    <td><?php echo $row['department_abbrv'] . ' - ' . $row['department_name'] ?></td>
                                     <td><?php echo $row['eIDno'] ?></td>
                                     <td><?php echo $fullname ?></td>
                                     <td class="text-uppercase"><?php echo $row['empType'] ?></td>
@@ -117,7 +139,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                            <?php endwhile;
+                        <?php endwhile;
                         } else {
                             echo '<tr class="text-center">
                                 <td colspan="6">No Employees found in Database!</td></tr>';
@@ -133,9 +155,9 @@
 
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('#list').dataTable()
-        $('.delete-employee').click(function () {
+        $('.delete-employee').click(function() {
             _conf("Are you sure to delete this employee?", "delete_employee", [$(this).attr('data-id')])
         })
 
@@ -143,16 +165,19 @@
 
 
     })
+
     function delete_employee($cat_id) {
         start_load()
         $.ajax({
             url: 'ajax.php?action=delete_employee',
             method: 'POST',
-            data: { cat_id: $cat_id },
-            success: function (resp) {
+            data: {
+                cat_id: $cat_id
+            },
+            success: function(resp) {
                 if (resp == 1) {
                     alert_toast("Data successfully deleted", 'success')
-                    setTimeout(function () {
+                    setTimeout(function() {
                         location.reload()
                     }, 1500)
 
@@ -162,7 +187,7 @@
     }
 
 
-    $('#manage-employee').submit(function (e) {
+    $('#manage-employee').submit(function(e) {
         e.preventDefault();
         start_load()
         $('#msg').html('')
@@ -170,10 +195,10 @@
             url: 'ajax.php?action=save_employee',
             method: 'POST',
             data: $(this).serialize(),
-            success: function (resp) {
+            success: function(resp) {
                 if (resp == 1) {
                     alert_toast("Data successfully saved.", "success");
-                    setTimeout(function () {
+                    setTimeout(function() {
                         location.replace('index.php?page=employee_list')
                     }, 750)
                 } else if (resp == 2) {

@@ -1,5 +1,3 @@
-
-
 <div class="row">
     <!-- Form Section -->
     <div class="col-md-3">
@@ -11,6 +9,23 @@
                 <form method="POST" action="" id="manage-materials">
                     <input type="hidden" name="material_id"
                         value="<?php echo isset($material_id) ? $material_id : '' ?>">
+
+                    <!-- Supplier Selection -->
+                    <div class="form-group">
+                        <label for="department">Supplier</label>
+                        <select class="form-control" name="supplier_id" id="supplier_id" required>
+                            <option value="">Select Supplier</option>
+                            <?php
+                            $dept_qry = $conn->query("SELECT * FROM supplier_list");
+                            while ($dept = $dept_qry->fetch_assoc()):
+                                $selected = (isset($supplier_id) && $supplier_id == $dept['supplier_id']) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo $dept['supplier_id'] ?>" <?php echo $selected ?>>
+                                    <?php echo $dept['supplier_name'] ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="material_name">Material Name</label>
                         <input type="text" class="form-control" id="material_name" name="material_name"
@@ -85,13 +100,15 @@
         <div class="card">
             <div class="card-header">
                 <strong>Materials List</strong>
-                
+
             </div>
             <div class="card-body">
-                <table class="table table-bordered table-hover" id="list">
+                <table class="table table-bordered table-hover table-responsive" id="list">
+                   
                     <thead>
                         <tr>
                             <th>#</th>
+                            <th>Supplier</th>
                             <th>Material Name</th>
                             <th>Category</th>
                             <th>Initial Qty.</th>
@@ -107,13 +124,14 @@
                         $i = 1;
                         // Join categories_list to get category_name
                         $qry = $conn->query("
-                                SELECT m.*, c.category_name,
+                                SELECT s.supplier_name, m.*, c.category_name,
                                     (m.initial_quantity 
                                         + IFNULL((SELECT SUM(r.quantity) FROM restock_list r WHERE r.material_id = m.material_id), 0)
                                         - IFNULL(SUM(d.quantity),0)) AS qty_now
                                 FROM materials_list m
                                 LEFT JOIN categories_list c ON m.category_id = c.cat_id
                                 LEFT JOIN distribution_list d ON m.material_id = d.material_id
+                                LEFT JOIN supplier_list s ON s.supplier_id = m.supplier_id
                                 GROUP BY m.material_id
                                 ORDER BY m.date_added ASC
                             ");
@@ -136,9 +154,10 @@
                                     $level = 'Low';
                                     $badge = 'badge-danger';
                                 }
-                                ?>
+                        ?>
                                 <tr>
                                     <td><?= $i++ ?></td>
+                                    <td><?= htmlspecialchars($row['supplier_name']) ?></td>
                                     <td><?= htmlspecialchars($row['material_name']) ?></td>
                                     <td><?= htmlspecialchars($row['category_name']) ?></td>
 
@@ -265,12 +284,10 @@
     </div>
 </div>
 <script>
-
-
     let currentMaterialName = "";
     let currentCategory = "";
 
-    $(document).on('click', '.view-restock', function () {
+    $(document).on('click', '.view-restock', function() {
         let material_id = $(this).data('id');
         currentMaterialName = $(this).data('name');
         currentCategory = $(this).data('category');
@@ -281,8 +298,10 @@
         $.ajax({
             url: 'ajax.php?action=get_restock_list',
             method: 'POST',
-            data: { material_id: material_id },
-            success: function (resp) {
+            data: {
+                material_id: material_id
+            },
+            success: function(resp) {
                 try {
                     let data = JSON.parse(resp);
                     let rows = "";
@@ -304,7 +323,6 @@
             }
         })
     });
-
 </script>
 
 
@@ -319,13 +337,18 @@
         // fallback for "YYYY-MM-DD HH:MM:SS" etc.
         var m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
         if (m) {
-            var y = +m[1], mo = +m[2] - 1, day = +m[3], hh = +(m[4] || 0), mi = +(m[5] || 0), ss = +(m[6] || 0);
+            var y = +m[1],
+                mo = +m[2] - 1,
+                day = +m[3],
+                hh = +(m[4] || 0),
+                mi = +(m[5] || 0),
+                ss = +(m[6] || 0);
             return new Date(y, mo, day, hh, mi, ss);
         }
         return null;
     }
 
-    document.getElementById("downloadExcel").addEventListener("click", function () {
+    document.getElementById("downloadExcel").addEventListener("click", function() {
         var table = document.getElementById("restockHistoryTable");
         if (!table) {
             alert("No restock table found");
@@ -333,13 +356,17 @@
         }
 
         // Create worksheet placing the HTML table at A3 (so header will be at row 3)
-        var ws = XLSX.utils.table_to_sheet(table, { origin: "A3" });
+        var ws = XLSX.utils.table_to_sheet(table, {
+            origin: "A3"
+        });
 
         // Insert meta rows at A1-A2 (safe because table was placed at A3)
         XLSX.utils.sheet_add_aoa(ws, [
             ["Category:", currentCategory || ""],
             ["Material Name:", currentMaterialName || ""]
-        ], { origin: "A1" });
+        ], {
+            origin: "A1"
+        });
 
         // Convert column A (dates) in data rows to real JS Date objects so Excel shows real dates
         var range = ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']) : null;
@@ -352,7 +379,10 @@
             var dataStart = tableHeaderRowIndex + 1;
 
             for (var R = dataStart; R <= range.e.r; ++R) {
-                var cellRef = XLSX.utils.encode_cell({ c: 0, r: R }); // column A = 0
+                var cellRef = XLSX.utils.encode_cell({
+                    c: 0,
+                    r: R
+                }); // column A = 0
                 var cell = ws[cellRef];
                 if (!cell) continue;
                 // If it's a string/date-like, parse it
@@ -392,7 +422,7 @@
 </script>
 
 <script>
-    $(document).on('click', '.restock-btn', function () {
+    $(document).on('click', '.restock-btn', function() {
         let id = $(this).data('id');
         let name = $(this).data('name');
         let category = $(this).data('category');
@@ -403,18 +433,17 @@
         $('#restock_quantity').val('');
         $('#restockModal').modal('show');
     });
-
 </script>
 
 <script>
-    $(document).on('click', '.restock-btn', function () {
+    $(document).on('click', '.restock-btn', function() {
         let index = $(this).data('index');
         $('#restock_index').val(index);
         $('#restock_quantity').val('');
         $('#restockModal').modal('show');
     });
 
-    $('#manage-materials').submit(function (e) {
+    $('#manage-materials').submit(function(e) {
         e.preventDefault();
         start_load()
         $('#msg').html('')
@@ -422,10 +451,10 @@
             url: 'ajax.php?action=save_materials',
             method: 'POST',
             data: $(this).serialize(),
-            success: function (resp) {
+            success: function(resp) {
                 if (resp == 1) {
                     alert_toast("Data successfully saved.", "success");
-                    setTimeout(function () {
+                    setTimeout(function() {
                         location.replace('index.php?page=materials_list')
                     }, 750)
                 } else if (resp == 2) {
@@ -436,18 +465,18 @@
         })
     })
 
-    $('#restock').submit(function (e) {
+    $('#restock').submit(function(e) {
         e.preventDefault();
         start_load()
         $.ajax({
             url: 'ajax.php?action=save_restock',
             method: 'POST',
             data: $(this).serialize(),
-            success: function (resp) {
+            success: function(resp) {
                 if (resp == 1) {
                     $('#restockModal').modal('hide');
                     alert_toast("Stock successfully updated!", "success");
-                    setTimeout(function () {
+                    setTimeout(function() {
                         location.reload();
                     }, 1000)
                 } else {
@@ -459,11 +488,11 @@
     })
 </script>
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
 
         $('#list').dataTable()
 
-        $('.delete-material').click(function () {
+        $('.delete-material').click(function() {
             _conf("Are you sure to delete this material?", "delete_material", [$(this).attr('data-id')])
         })
 
@@ -471,16 +500,18 @@
 
 
 
-    function delete_material($cat_id) {
+    function delete_material($id) {
         start_load()
         $.ajax({
-            url: 'ajax.php?action=delete_material',
+            url: 'ajax.php?action=delete_materials',
             method: 'POST',
-            data: { cat_id: $cat_id },
-            success: function (resp) {
+            data: {
+                id: $id
+            },
+            success: function(resp) {
                 if (resp == 1) {
                     alert_toast("Data successfully deleted", 'success')
-                    setTimeout(function () {
+                    setTimeout(function() {
                         location.reload()
                     }, 1500)
 

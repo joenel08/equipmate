@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 05, 2025 at 08:01 AM
+-- Generation Time: Jan 11, 2026 at 11:27 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -48,6 +48,26 @@ INSERT INTO `categories_list` (`cat_id`, `category_name`, `category_description`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `department_list`
+--
+
+CREATE TABLE `department_list` (
+  `d_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `department_abbrv` varchar(25) NOT NULL,
+  `date_added` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `department_list`
+--
+
+INSERT INTO `department_list` (`d_id`, `department_name`, `department_abbrv`, `date_added`) VALUES
+(1, 'Math Department', 'Math101', '2026-01-11 13:34:51');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `distribution_list`
 --
 
@@ -66,7 +86,8 @@ CREATE TABLE `distribution_list` (
 INSERT INTO `distribution_list` (`distribution_id`, `material_id`, `employee_id`, `quantity`, `date_distributed`) VALUES
 (1, 1, 1, 1, '2025-10-03 14:47:12'),
 (4, 1, 1, 5, '2025-10-03 15:17:54'),
-(5, 1, 1, 2, '2025-10-03 15:18:06');
+(5, 1, 1, 2, '2025-10-03 15:18:06'),
+(6, 1, 1, 5, '2025-11-05 22:52:59');
 
 -- --------------------------------------------------------
 
@@ -77,6 +98,7 @@ INSERT INTO `distribution_list` (`distribution_id`, `material_id`, `employee_id`
 CREATE TABLE `employees` (
   `employee_id` int(11) NOT NULL,
   `eIDno` varchar(50) NOT NULL,
+  `department_id` int(11) NOT NULL,
   `empType` enum('faculty','staff') NOT NULL,
   `preName` varchar(50) DEFAULT NULL,
   `lName` varchar(100) NOT NULL,
@@ -90,8 +112,8 @@ CREATE TABLE `employees` (
 -- Dumping data for table `employees`
 --
 
-INSERT INTO `employees` (`employee_id`, `eIDno`, `empType`, `preName`, `lName`, `fName`, `mName`, `sName`, `created_at`) VALUES
-(1, '2021123', 'faculty', 'Mr.', 'Doe', 'John', 'Dela', 'DIT', '2025-10-03 06:07:42');
+INSERT INTO `employees` (`employee_id`, `eIDno`, `department_id`, `empType`, `preName`, `lName`, `fName`, `mName`, `sName`, `created_at`) VALUES
+(1, '2021123', 1, 'staff', 'Mr.', 'Doe', 'John', 'Dela', 'DIT', '2025-10-03 06:07:42');
 
 -- --------------------------------------------------------
 
@@ -101,6 +123,7 @@ INSERT INTO `employees` (`employee_id`, `eIDno`, `empType`, `preName`, `lName`, 
 
 CREATE TABLE `materials_list` (
   `material_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
   `material_name` varchar(255) NOT NULL,
   `category_id` int(11) NOT NULL,
   `initial_quantity` int(11) NOT NULL,
@@ -112,10 +135,10 @@ CREATE TABLE `materials_list` (
 -- Dumping data for table `materials_list`
 --
 
-INSERT INTO `materials_list` (`material_id`, `material_name`, `category_id`, `initial_quantity`, `unit`, `date_added`) VALUES
-(1, 'A4 Bond Paper', 1, 10, 'ream', '2025-10-03 13:14:52'),
-(2, 'Long Folder', 2, 50, 'pcs', '2025-10-03 14:25:55'),
-(3, 'Chalk', 1, 50, 'box', '2025-10-03 14:26:19');
+INSERT INTO `materials_list` (`material_id`, `supplier_id`, `material_name`, `category_id`, `initial_quantity`, `unit`, `date_added`) VALUES
+(1, 2, 'A4 Bond Paper', 1, 10, 'ream', '2025-10-03 13:14:52'),
+(2, 2, 'Long Folder', 1, 50, 'pcs', '2025-10-03 14:25:55'),
+(3, 2, 'Chalk', 1, 50, 'box', '2025-10-03 14:26:19');
 
 -- --------------------------------------------------------
 
@@ -136,6 +159,26 @@ CREATE TABLE `restock_list` (
 
 INSERT INTO `restock_list` (`restock_id`, `material_id`, `quantity`, `date_added`) VALUES
 (1, 1, 2, '2025-10-03 07:25:23');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `supplier_list`
+--
+
+CREATE TABLE `supplier_list` (
+  `supplier_id` int(11) NOT NULL,
+  `supplier_name` varchar(255) NOT NULL,
+  `supplier_address` varchar(255) NOT NULL,
+  `date_added` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `supplier_list`
+--
+
+INSERT INTO `supplier_list` (`supplier_id`, `supplier_name`, `supplier_address`, `date_added`) VALUES
+(2, 'Some Supplier Name', 'Cabagan, Isabela', '2026-01-11 18:05:16');
 
 -- --------------------------------------------------------
 
@@ -194,6 +237,12 @@ ALTER TABLE `categories_list`
   ADD PRIMARY KEY (`cat_id`);
 
 --
+-- Indexes for table `department_list`
+--
+ALTER TABLE `department_list`
+  ADD PRIMARY KEY (`d_id`);
+
+--
 -- Indexes for table `distribution_list`
 --
 ALTER TABLE `distribution_list`
@@ -223,6 +272,12 @@ ALTER TABLE `restock_list`
   ADD KEY `material_id` (`material_id`);
 
 --
+-- Indexes for table `supplier_list`
+--
+ALTER TABLE `supplier_list`
+  ADD PRIMARY KEY (`supplier_id`);
+
+--
 -- Indexes for table `system_settings`
 --
 ALTER TABLE `system_settings`
@@ -245,28 +300,40 @@ ALTER TABLE `categories_list`
   MODIFY `cat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `department_list`
+--
+ALTER TABLE `department_list`
+  MODIFY `d_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `distribution_list`
 --
 ALTER TABLE `distribution_list`
-  MODIFY `distribution_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `distribution_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `employees`
 --
 ALTER TABLE `employees`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `materials_list`
 --
 ALTER TABLE `materials_list`
-  MODIFY `material_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `material_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `restock_list`
 --
 ALTER TABLE `restock_list`
   MODIFY `restock_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `supplier_list`
+--
+ALTER TABLE `supplier_list`
+  MODIFY `supplier_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `system_settings`

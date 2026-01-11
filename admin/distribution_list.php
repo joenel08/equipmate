@@ -82,6 +82,7 @@
               <th>#</th>
               <th>Date</th>
               <th>Material</th>
+              <th>Department</th>
               <th>Recipient Type</th>
               <th>Recipient Name</th>
               <th>Quantity</th>
@@ -90,11 +91,12 @@
           <tbody>
             <?php
             $i = 1;
-            $qry = $conn->query("SELECT d.*, m.material_name, m.unit, 
+            $qry = $conn->query("SELECT dl.*, d.*, m.material_name, m.unit, 
                                       e.empType, e.preName, e.fName, e.mName, e.lName, e.sName
                                 FROM distribution_list d
                                 INNER JOIN materials_list m ON d.material_id = m.material_id
                                 INNER JOIN employees e ON d.employee_id = e.employee_id
+                                LEFT JOIN department_list dl ON dl.d_id = e.department_id
                                 ORDER BY d.date_distributed DESC");
 
             if ($qry->num_rows > 0) {
@@ -106,6 +108,7 @@
                   <td class="text-center"><?php echo $i++; ?></td>
                   <td><?php echo date("Y-m-d H:i", strtotime($row['date_distributed'])); ?></td>
                   <td><?php echo $row['material_name'] ; ?></td>
+                  <td><?php echo $row['department_abbrv'].' - '.$row['department_name'] ?></td>
                   <td><?php echo $row['empType']; ?></td>
                   <td><?php echo $fullname; ?></td>
                   <td><?php echo $row['quantity']. ' (' . $row['unit'] . ')'; ?></td>

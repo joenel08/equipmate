@@ -101,7 +101,6 @@ class Action
 		}
 		if (!empty($password)) {
 			$data .= ", password=md5('$password') ";
-
 		}
 		$check = $this->db->query("SELECT * FROM users where email ='$email' " . (!empty($id) ? " and id != {$id} " : ''))->num_rows;
 		if ($check > 0) {
@@ -112,7 +111,6 @@ class Action
 			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['img']['name'];
 			$move = move_uploaded_file($_FILES['img']['tmp_name'], 'assets/uploads/' . $fname);
 			$data .= ", avatar = '$fname' ";
-
 		}
 		if (empty($id)) {
 			$save = $this->db->query("INSERT INTO users set $data");
@@ -134,7 +132,6 @@ class Action
 					if (empty($v))
 						continue;
 					$v = md5($v);
-
 				}
 				if (empty($data)) {
 					$data .= " $k='$v' ";
@@ -153,11 +150,9 @@ class Action
 			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['img']['name'];
 			$move = move_uploaded_file($_FILES['img']['tmp_name'], 'assets/uploads/' . $fname);
 			$data .= ", avatar = '$fname' ";
-
 		}
 		if (empty($id)) {
 			$save = $this->db->query("INSERT INTO users set $data");
-
 		} else {
 			$save = $this->db->query("UPDATE users set $data where id = $id");
 		}
@@ -200,7 +195,6 @@ class Action
 			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['img']['name'];
 			$move = move_uploaded_file($_FILES['img']['tmp_name'], 'assets/uploads/' . $fname);
 			$data .= ", avatar = '$fname' ";
-
 		}
 		if (!empty($password))
 			$data .= " ,password=md5('$password') ";
@@ -228,6 +222,76 @@ class Action
 		if ($delete)
 			return 1;
 	}
+
+
+	function save_department()
+	{
+
+		extract($_POST);
+		$data = "";
+		foreach ($_POST as $k => $v) {
+
+			if (empty($data)) {
+				$data .= " $k='$v' ";
+			} else {
+				$data .= ", $k='$v' ";
+			}
+		}
+
+		if (empty($d_id)) {
+			$save = $this->db->query("INSERT INTO department_list set $data");
+		} else {
+			$save = $this->db->query("UPDATE department_list set $data where d_id = $d_id");
+		}
+
+		if ($save) {
+			return 1;
+		}
+	}
+
+	function delete_department()
+	{
+		extract($_POST);
+		$delete = $this->db->query("DELETE FROM department_list where d_id = " . $d_id);
+		if ($delete)
+			return 1;
+	}
+
+
+	function save_supplier()
+	{
+
+		extract($_POST);
+		$data = "";
+		foreach ($_POST as $k => $v) {
+
+			if (empty($data)) {
+				$data .= " $k='$v' ";
+			} else {
+				$data .= ", $k='$v' ";
+			}
+		}
+
+		if (empty($supplier_id)) {
+			$save = $this->db->query("INSERT INTO supplier_list set $data");
+		} else {
+			$save = $this->db->query("UPDATE supplier_list set $data where supplier_id = $supplier_id");
+		}
+
+		if ($save) {
+			return 1;
+		}
+	}
+
+	function delete_supplier()
+	{
+		extract($_POST);
+		$delete = $this->db->query("DELETE FROM supplier_list where supplier_id = " . $supplier_id);
+		if ($delete)
+			return 1;
+	}
+
+
 	function save_system_settings()
 	{
 		extract($_POST);
@@ -245,7 +309,6 @@ class Action
 			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['cover']['name'];
 			$move = move_uploaded_file($_FILES['cover']['tmp_name'], '../assets/uploads/' . $fname);
 			$data .= ", cover_img = '$fname' ";
-
 		}
 		$chk = $this->db->query("SELECT * FROM system_settings");
 		if ($chk->num_rows > 0) {
@@ -351,7 +414,6 @@ class Action
 		}
 		if (!empty($password)) {
 			$data .= ", password=md5('$password') ";
-
 		}
 		$check = $this->db->query("SELECT * FROM faculty_list where email ='$email' " . (!empty($id) ? " and id != {$id} " : ''))->num_rows;
 		if ($check > 0) {
@@ -367,13 +429,11 @@ class Action
 			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['img']['name'];
 			$move = move_uploaded_file($_FILES['img']['tmp_name'], 'assets/uploads/' . $fname);
 			$data .= ", avatar = '$fname' ";
-
 		}
 		if (isset($_FILES['signature']) && $_FILES['signature']['tmp_name'] != '') {
 			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['signature']['name'];
 			$move = move_uploaded_file($_FILES['signature']['tmp_name'], 'assets/uploads/' . $fname);
 			$data .= ", signature = '$fname' ";
-
 		}
 
 		if (empty($id)) {
@@ -434,6 +494,7 @@ class Action
 		extract($_POST);
 
 		$material_name = $this->db->real_escape_string($material_name);
+		$supplier_id = intval($supplier_id);
 		$category = intval($category);
 		$initial_quantity = intval($initial_quantity);
 		$unit = $this->db->real_escape_string($unit);
@@ -441,8 +502,8 @@ class Action
 		if (empty($material_id)) {
 			// Insert
 			$insert = $this->db->query("INSERT INTO materials_list 
-            (material_name, category_id, initial_quantity, unit, date_added) 
-            VALUES ('$material_name', '$category', '$initial_quantity', '$unit', NOW())");
+            (supplier_id, material_name, category_id, initial_quantity, unit, date_added) 
+            VALUES ('$supplier_id', '$material_name', '$category', '$initial_quantity', '$unit', NOW())");
 
 			if ($insert) {
 				return 1;
@@ -452,6 +513,7 @@ class Action
 		} else {
 			// Update
 			$update = $this->db->query("UPDATE materials_list SET 
+			supplier_id = '$supplier_id',
             material_name = '$material_name',
             category_id = '$category',
             initial_quantity = '$initial_quantity',
@@ -467,7 +529,7 @@ class Action
 	}
 
 
-	function delete_material()
+	function delete_materials()
 	{
 		extract($_POST);
 		$delete = $this->db->query("DELETE FROM materials_list where material_id = " . $id);
@@ -478,6 +540,8 @@ class Action
 	function save_employee()
 	{
 		$employee_id = $_POST['employee_id'] ?? '';
+		$department_id = $_POST['department_id'] ?? '';
+
 		$eIDno = $_POST['eIDno'];
 		$empType = $_POST['empType'];
 		$preName = $_POST['preName'] ?? '';
@@ -488,22 +552,21 @@ class Action
 
 		if ($employee_id) {
 			// Update existing employee
-			$query = "UPDATE employees SET 
+			$query = "UPDATE employees SET department_id = ?,
                     eIDno=?, empType=?, preName=?, lName=?, fName=?, mName=?, sName=?
                   WHERE employee_id=?";
 			$stmt = $this->db->prepare($query);
-			$stmt->bind_param("sssssssi", $eIDno, $empType, $preName, $lName, $fName, $mName, $sName, $employee_id);
+			$stmt->bind_param("isssssssi", $department_id, $eIDno, $empType, $preName, $lName, $fName, $mName, $sName, $employee_id);
 		} else {
 			// Insert new employee
-			$query = "INSERT INTO employees (eIDno, empType, preName, lName, fName, mName, sName) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?)";
+			$query = "INSERT INTO employees (department_id, eIDno, empType, preName, lName, fName, mName, sName) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 			$stmt = $this->db->prepare($query);
-			$stmt->bind_param("sssssss", $eIDno, $empType, $preName, $lName, $fName, $mName, $sName);
+			$stmt->bind_param("isssssss", $department_id, $eIDno, $empType, $preName, $lName, $fName, $mName, $sName);
 		}
 
 		if ($stmt->execute()) {
 			return 1;
-
 		} else {
 			echo $stmt->error;
 		}
@@ -562,7 +625,6 @@ class Action
 		} else {
 			return 0;
 		}
-
 	}
 
 	function get_restock_list()
@@ -575,11 +637,11 @@ class Action
 		}
 		echo json_encode($data);
 	}
-
 	function fetch_materials()
 	{
 		$month = $_POST['month'] ?? '';
 		$year = $_POST['year'] ?? '';
+
 		// Build filter for distributed quantity
 		$distFilter = "";
 		if ($month)
@@ -587,41 +649,84 @@ class Action
 		if ($year)
 			$distFilter .= " AND YEAR(d2.date_distributed) = '$year'";
 
-
 		$restockFilter = "";
 		if ($month)
 			$restockFilter .= " AND MONTH(r.date_restocked) = '$month'";
 		if ($year)
 			$restockFilter .= " AND YEAR(r.date_restocked) = '$year'";
 
-		$where = "";
-		if ($month && $year) {
-			$where = "AND MONTH(d.date_distributed) = '$month' AND YEAR(d.date_distributed) = '$year'";
-		} elseif ($year) {
-			$where = "AND YEAR(d.date_distributed) = '$year'";
-		} elseif ($month) {
-			$where = "AND MONTH(d.date_distributed) = '$month'";
+		// New: Fetch distribution details with employee and department info
+		$distributionDetails = "";
+		if ($month || $year) {
+			$distWhere = "WHERE 1=1";
+			if ($month) $distWhere .= " AND MONTH(dl.date_distributed) = '$month'";
+			if ($year) $distWhere .= " AND YEAR(dl.date_distributed) = '$year'";
+
+			$distributionDetails = "
+            , (
+                SELECT GROUP_CONCAT(
+                    CONCAT(
+                        '<div class=\"distribution-detail\">',
+                        '<strong>Employee:</strong> ', 
+                        CONCAT(e.preName, ' ', e.fName, ' ', e.mName, ' ', e.lName, 
+                               CASE WHEN e.sName IS NOT NULL AND e.sName != '' THEN CONCAT(', ', e.sName) ELSE '' END),
+                        '<br><strong>Dept:</strong> ', 
+                        CONCAT(dl.dept_abbrv, ' - ', dl.dept_name),
+                        '<br><strong>Qty:</strong> ', dl.quantity,
+                        '<br><strong>Date:</strong> ', DATE_FORMAT(dl.date_distributed, '%M %d, %Y'),
+                        '</div>'
+                    ) SEPARATOR '<hr>'
+                )
+                FROM (
+                    SELECT 
+                        d.distribution_id,
+                        d.quantity,
+                        d.date_distributed,
+                        e.employee_id,
+                        e.preName,
+                        e.fName,
+                        e.mName,
+                        e.lName,
+                        e.sName,
+                        e.eIDno,
+                        d2.department_abbrv as dept_abbrv,
+                        d2.department_name as dept_name
+                    FROM distribution_list d
+                    LEFT JOIN employees e ON d.employee_id = e.employee_id
+                    LEFT JOIN department_list d2 ON e.department_id = d2.d_id
+                    $distWhere
+                ) dl
+                WHERE dl.employee_id IS NOT NULL 
+                AND dl.distribution_id IN (
+                    SELECT d3.distribution_id 
+                    FROM distribution_list d3 
+                    WHERE d3.material_id = m.material_id
+                )
+            ) AS distribution_details
+        ";
 		}
 
 		$qry = $this->db->query("
-    SELECT 
-        m.*,
-        c.category_name,
-		 IFNULL((SELECT SUM(r.quantity) FROM restock_list r WHERE r.material_id = m.material_id $restockFilter),0) AS qty_restocked,
-        (m.initial_quantity 
-            + IFNULL((SELECT SUM(r.quantity) FROM restock_list r WHERE r.material_id = m.material_id), 0)
-            - IFNULL((SELECT SUM(d2.quantity) FROM distribution_list d2 
-                        WHERE d2.material_id = m.material_id
-                        " . ($month ? "AND MONTH(d2.date_distributed) = '$month'" : "") . "
-                        " . ($year ? "AND YEAR(d2.date_distributed) = '$year'" : "") . "),0)
-        ) AS qty_now,
-		  IFNULL((SELECT SUM(d3.quantity) FROM distribution_list d3 
-                        WHERE d3.material_id = m.material_id $distFilter),0) AS qty_distributed
-    FROM materials_list m
-    LEFT JOIN categories_list c ON m.category_id = c.cat_id
-    ORDER BY m.date_added ASC
-");
-
+        SELECT 
+            m.*, s.*,
+            c.category_name,
+            IFNULL((SELECT SUM(r.quantity) FROM restock_list r WHERE r.material_id = m.material_id $restockFilter),0) AS qty_restocked,
+            (m.initial_quantity 
+                + IFNULL((SELECT SUM(r.quantity) FROM restock_list r WHERE r.material_id = m.material_id), 0)
+                - IFNULL((SELECT SUM(d2.quantity) FROM distribution_list d2 
+                            WHERE d2.material_id = m.material_id
+                            " . ($month ? "AND MONTH(d2.date_distributed) = '$month'" : "") . "
+                            " . ($year ? "AND YEAR(d2.date_distributed) = '$year'" : "") . "),0)
+            ) AS qty_now,
+            IFNULL((SELECT SUM(d3.quantity) FROM distribution_list d3 
+                            WHERE d3.material_id = m.material_id $distFilter),0) AS qty_distributed
+            $distributionDetails
+        FROM materials_list m
+        LEFT JOIN categories_list c ON m.category_id = c.cat_id
+		LEFT JOIN supplier_list s ON m.supplier_id = s.supplier_id
+        HAVING qty_distributed > 0 OR " . (empty($month) && empty($year) ? "1=1" : "0=1") . "
+        ORDER BY m.date_added ASC
+    ");
 
 		$i = 1;
 		if ($qry->num_rows > 0) {
@@ -629,7 +734,7 @@ class Action
 				$initial = (int) $row['initial_quantity'];
 				$now = (int) $row['qty_now'];
 				$distributed = (int) $row['qty_distributed'];
-				 $restocked = (int) $row['qty_restocked'];
+				$restocked = (int) $row['qty_restocked'];
 				$percent = $initial > 0 ? ($now / $initial) * 100 : 0;
 
 				if ($percent >= 70) {
@@ -643,29 +748,36 @@ class Action
 					$badge = 'badge-danger';
 				}
 
-				$hashed_link = hash('sha256', $row['material_id']);
-				?>
+				// Check if there are distribution details
+				$hasDistributionDetails = isset($row['distribution_details']) && !empty($row['distribution_details']);
+
+?>
 				<tr>
 					<td><?= $i++ ?></td>
+					<td><?= htmlspecialchars($row['supplier_name']) ?></td>
 					<td><?= htmlspecialchars($row['material_name']) ?></td>
 					<td><?= htmlspecialchars($row['category_name']) ?></td>
 					<td>
 						<span class="font-weight-bold"><?= $initial + $restocked ?> </span><br>
-
 					</td>
 					<td><?= $now ?></td>
-					
-
-					<td><?= $distributed ?></td> <!-- New column -->
+					<td>
+						<?= $distributed ?>
+						<?php if ($hasDistributionDetails): ?>
+							<button type="button" class="btn btn-info btn-sm view-distribution"
+								data-details="<?= htmlspecialchars($row['distribution_details']) ?>"
+								data-material="<?= htmlspecialchars($row['material_name']) ?>">
+								<i class="fa fa-eye"></i> View Details
+							</button>
+						<?php endif; ?>
+					</td>
 					<td><?= htmlspecialchars($row['unit']) ?></td>
 					<td><span class="badge <?= $badge ?>"><?= $level ?></span></td>
-
 				</tr>
-				<?php
+<?php
 			}
 		} else {
 			echo '<tr class="text-center"><td colspan="9">No Materials Found!</td></tr>';
 		}
-
 	}
 }

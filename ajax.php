@@ -65,16 +65,6 @@ if($action == 'delete_academic'){
 }
 
 
-if($action == 'save_faculty'){
-	$save = $crud->save_faculty();
-	if($save)
-		echo $save;
-}
-if($action == 'delete_faculty'){
-	$save = $crud->delete_faculty();
-	if($save)
-		echo $save;
-}
 
 if($action == 'save_category'){
 	$save = $crud->save_category();
@@ -86,6 +76,29 @@ if($action == 'delete_category'){
 	if($save)
 		echo $save;
 }
+
+if($action == 'save_department'){
+	$save = $crud->save_department();
+	if($save)
+		echo $save;
+}
+if($action == 'delete_department'){
+	$save = $crud->delete_department();
+	if($save)
+		echo $save;
+}
+
+if($action == 'save_supplier'){
+	$save = $crud->save_supplier();
+	if($save)
+		echo $save;
+}
+if($action == 'delete_supplier'){
+	$save = $crud->delete_supplier();
+	if($save)
+		echo $save;
+}
+
 
 if($action == 'save_materials'){
 	$save = $crud->save_materials();
